@@ -1,0 +1,65 @@
+plugins {
+    // Kotlin version is automatically set by the plugin
+    id 'org.jetbrains.kotlin.jvm' version '1.2.21'
+    id 'application'
+}
+
+// extra variables
+ext {
+    groupId = 'com.github.lukassup.tools'
+    versionNum = '0.1.0-SNAPSHOT'
+}
+
+group groupId
+version versionNum
+
+defaultTasks 'run'
+mainClassName = "${groupId}.MainKt"
+
+allprojects {
+    group = groupId
+    version = versionNum
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+//    compile 'org.jetbrains.kotlin:kotlin-reflect'
+    testCompile 'org.jetbrains.kotlin:kotlin-test'
+    testCompile 'org.jetbrains.kotlin:kotlin-test-junit'
+    testCompile 'junit:junit:4.+'
+}
+
+kotlin {
+    experimental {
+        coroutines 'enable'
+    }
+}
+compileKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.5'
+}
+
+// show test output
+tasks.withType(Test) {
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+}
+
+jar {
+    manifest {
+        // set the 'Main-Class' to make the jar executable
+        attributes["Main-Class"] = "${groupId}.MainKt"
+    }
+    // build a fat jar
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
